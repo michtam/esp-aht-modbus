@@ -13,18 +13,19 @@
 #include <iterator>
 #include <iostream>
 
+// Software serial
+#include <SoftwareSerial.h>
+
 // Modbus lib https://github.com/emelianov/modbus-esp8266
 #include <ModbusRTU.h>
 #include <ModbusIP_ESP8266.h>
 
+// Network and webserver related
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <SoftwareSerial.h>
-#include <ArduinoOTA.h>
-
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+#include <ArduinoOTA.h>
 
 #include "pages.h"
 #include "registers.h"
@@ -114,38 +115,6 @@ void config_webserver(){
   });
 
   webserver.onNotFound(notFound);
-
-  webserver.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");
-  });
-
-  webserver.on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
-    shouldReboot = !Update.hasError();
-    AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", shouldReboot?"OK":"FAIL");
-    response->addHeader("Connection", "close");
-    request->send(response);
-  },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-    if(!index){
-      Serial.printf("Update Start: %s\n", filename.c_str());
-      Update.runAsync(true);
-      if(!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)){
-        Update.printError(Serial);
-      }
-    }
-    if(!Update.hasError()){
-      if(Update.write(data, len) != len){
-        Update.printError(Serial);
-      }
-    }
-    if(final){
-      if(Update.end(true)){
-        Serial.printf("Update Success: %uB\n", index+len);
-      } else {
-        Update.printError(Serial);
-      }
-    }
-  });
-
   webserver.onNotFound(onRequest);
   webserver.onFileUpload(onUpload);
   webserver.onRequestBody(onBody);
@@ -163,13 +132,11 @@ void setup() {
   WiFi.hostname(HOSTNAME);
   WiFi.begin(SSID, PSK);
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    delay(5000);
+    delay(500);
     ESP.restart();
   }
 
   // Init OTA and webui
-  MDNS.begin(HOSTNAME);
-  MDNS.addService("http", "tcp", 80);
   ArduinoOTA.setHostname(HOSTNAME);
   ArduinoOTA.begin();
 
@@ -189,6 +156,7 @@ void setup() {
 
   // Init webserver
   config_webserver();
+  AsyncElegantOTA.begin(&webserver);
   webserver.begin();
 
 }
@@ -196,13 +164,6 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-  MDNS.update();
-
-  if(shouldReboot){
-    Serial.println("Rebooting...");
-    delay(100);
-    ESP.restart();
-  }
 
   auto array_length = std::end(modbus_registers) - std::begin(modbus_registers);
   if (!mb_rtu.slave()) {
