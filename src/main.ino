@@ -50,6 +50,8 @@ bool shouldReboot = false;
 uint16_t cReg = 0;
 
 char BUILD_REVISION[] = AUTO_VERSION;
+char BUILD_TIMESTAMP[] = BUILD_TIME;
+
 float all_reg_values[std::end(modbus_registers) - std::begin(modbus_registers)];
 
 String getUptimeString() {
@@ -103,6 +105,11 @@ String processor(const String& var)
   if(var == "BUILD_REVISION"){
 
     return BUILD_REVISION;
+  }
+
+  if(var == "BUILD_TIMESTAMP"){
+
+    return BUILD_TIMESTAMP;
   }
   return String();
 }
