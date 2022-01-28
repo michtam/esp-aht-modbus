@@ -3,3 +3,4 @@
 .gcc-flags.json
 .ccls
 *.bin
+src/wifi_config.h
