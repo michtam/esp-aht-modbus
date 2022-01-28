@@ -25,7 +25,8 @@ const char index_page[] PROGMEM = R"=====(
   </head>
   <body>
     <h1>Modbus Bridge for AHT Module</h1>
-    <h2>Build revision: %BUILD_REVISION% </h2>
+    <h2>Build revision:  %BUILD_REVISION% </h2>
+    <h2>Build timestamp: %BUILD_TIMESTAMP% </h2>
     <h2>States</h2>
     <table class="customTable">
       <thead>
