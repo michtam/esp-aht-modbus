@@ -20,7 +20,7 @@ uploadfs :
 		pio -f -c vim run --target uploadfs
 
 uploadota :
-		pio -f -c vim run --target upload --upload-port 10.201.1.27
+		pio -f -c vim run --target upload --upload-port outside.local
 
 update :
 		pio -f -c vim update
