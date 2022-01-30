@@ -12,6 +12,7 @@
 */
 #include <iterator>
 #include <iostream>
+#include <time.h>
 
 // Software serial
 #include <SoftwareSerial.h>
@@ -50,9 +51,22 @@ bool shouldReboot = false;
 uint16_t cReg = 0;
 
 char BUILD_REVISION[] = AUTO_VERSION;
-char BUILD_TIMESTAMP[] = BUILD_TIME;
+String BUILD_TIMESTAMP;
 
 float all_reg_values[std::end(modbus_registers) - std::begin(modbus_registers)];
+
+String convertTimestamp(int rawtime) {
+
+    time_t rawtime_t = rawtime;
+    struct tm  ts;
+    char       buf[80];
+
+    // Format time, "ddd yyyy-mm-dd hh:mm:ss zzz"
+    ts = *localtime(&rawtime_t);
+    strftime(buf, sizeof(buf), "%a %Y-%m-%d %H:%M:%S %Z", &ts);
+    printf("%s\n", buf);
+    return buf;
+}
 
 String getUptimeString() {
   uint16_t days;
@@ -76,7 +90,7 @@ String getUptimeString() {
 
   char buffer[20];
   sprintf(buffer, "%4u days %02d:%02d:%02d", days, hours, minutes, seconds);
-  return buffer;
+  return String(buffer);
 }
 
 String processor(const String& var)
@@ -128,7 +142,10 @@ void config_webserver(){
 
 }
 
+
 void setup() {
+
+  BUILD_TIMESTAMP = convertTimestamp(strtoul(BUILD_TIME, NULL, 0 ));
 
   // Init serials
   Serial.begin(115200);
