@@ -13,6 +13,9 @@ upload :
 clean :
 		pio -f -c vim run --target clean
 
+cleanall :
+		pio -f -c vim run --target cleanall
+
 program :
 		pio -f -c vim run --target program
 
