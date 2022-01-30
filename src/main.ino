@@ -93,8 +93,17 @@ String getUptimeString() {
   return String(buffer);
 }
 
-String processor(const String& var)
-{
+
+void handleWiFiConnectivity(){
+
+  if( !WiFi.localIP().isSet() || !WiFi.isConnected() ){
+    WiFi.reconnect();
+  }
+
+}
+
+String processor(const String& var){
+
   if(var == "MODBUS_REGISTER_DATA"){
     String data_table = "";
 
@@ -187,6 +196,8 @@ void setup() {
 
 
 void loop() {
+
+  handleWiFiConnectivity();
   ArduinoOTA.handle();
 
   auto array_length = std::end(modbus_registers) - std::begin(modbus_registers);
