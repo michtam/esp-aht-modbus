@@ -1,0 +1,7 @@
+.pio
+.clang_complete
+.gcc-flags.json
+.ccls
+*.bin
+*.swp
+src/wifi_config.h
