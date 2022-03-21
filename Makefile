@@ -26,7 +26,7 @@ uploadota :
 		pio -f -c vim run --target upload --upload-port outside.local
 
 uploadota-luck :
-		pio -f -c vim run --target upload --upload-port 10.202.0.110
+		pio -f -c vim run --target upload --upload-port 10.202.1.245
 
 update :
 		pio -f -c vim update
